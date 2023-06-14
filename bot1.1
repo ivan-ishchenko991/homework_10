@@ -3,20 +3,30 @@ from collections import UserDict
 
 
 class Field:
+    def __init__(self, value):
+        self.value = value
+
+class Name(Field):
     pass
 
+class Phone(Field):
+    def __init__(self, phone):
+        self.phone = phone if phone else []
+
+class Record(Field):
+    def __init__(self, name, phone):
+        self.name = name.value
+        if phone.phone:
+            self.phones = []
+            self.phones.append(phone.phone)
+
 class AddressBook(UserDict, Field):
-    def add_record(self, name, phone):
-        self.name = name
-        self.phone = phone
-        self.data[self.name] = self.phone
+    def add_record(self, rec):
+        self.name = rec.name
+        self.phones = rec.phones
+        self.data[self.name] = self.phones
 
 numbers = AddressBook()
-
-class Record(AddressBook, Field):
-    def __init__(self, name):
-        self.name = name
-    phone = []
 
 def input_error(func):
     def inner(*args):
@@ -46,12 +56,10 @@ def adding(command):
     arguments = command.split(' ')
     arg_1 = arguments[1]
     if len(arguments) > 2:
-        Phone.phone = arguments[2:]
-        print(Phone.phone)
-        Record.phone = Phone.phone
-    name = Name(arg_1)
-    record = Record(name)
-    numbers.add_record(record.name.value, record.phone)
+        phone = Phone(arguments[2:])
+    name = Field(arg_1)
+    record = Record(name, phone)
+    numbers.add_record(record)
     print('\nCompleted!\n')
 
 @input_error
@@ -59,18 +67,17 @@ def changing(command):
     arguments = command.split(' ')
     arg_1 = arguments[1]
     if len(arguments) > 2:
-        Phone.phone = arguments[2:]
-        Record.phone = Phone.phone
-    name = Name(arg_1)
-    record = Record(name)
-    numbers.add_record(record.name.value, record.phone)
+        phone = Phone(arguments[2:])
+    name = Field(arg_1)
+    record = Record(name, phone)
+    numbers.add_record(record)
     print('\nCompleted!\n')
 
 @input_error
 def show_phone(command):
     arguments = command.split(' ')
     arg_1 = arguments[1]
-    name = Name(arg_1)
+    name = Field(arg_1)
     record = Record(name)
     for k in numbers.keys():
         if k == arg_1:
@@ -80,7 +87,7 @@ def show_phone(command):
 def deleting(command):
     arguments = command.split(' ')
     arg_1 = arguments[1]
-    name = Name(arg_1)
+    name = Field(arg_1)
     record = Record(name)
     numbers.pop(record.name.value)
     print('\nCompleted!\n')
@@ -89,13 +96,6 @@ def deleting(command):
 def show_all_phones():
     for k, v in numbers.items():
         print(f'{k}: {", ".join(v)}')
-
-class Name(Field):
-    def __init__(self, value):
-        self.value = value
-
-class Phone(Field):
-    phone = None
 
 if __name__=='__main__':
     while True:
@@ -116,3 +116,17 @@ if __name__=='__main__':
         elif match(goodbye, user_command):
             print('Good bye!')
             break
+
+# if __name__ == "__main__":
+#     name = Name('Bill')
+#     phone = Phone('1234567890')
+#     rec = Record(name, phone)
+#     ab = AddressBook()
+#     ab.add_record(rec)
+#     print(ab)
+#     assert isinstance(ab['Bill'], Record)
+#     assert isinstance(ab['Bill'].name, Name)
+#     assert isinstance(ab['Bill'].phones, list)
+#     assert isinstance(ab['Bill'].phones[0], Phone)
+#     assert ab['Bill'].phones[0].value == '1234567890'
+#     print('All Ok)')
